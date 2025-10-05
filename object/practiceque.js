@@ -27,11 +27,25 @@ car:name,model,color */
 /* Create an Object Person with their name , age  , city 
 Edit their city,s original value to change it  to "newyork
 add new country as United states*/
-const Person={
-    pName :"Raman",
-    age:45,
-    city:"Newyork",
+// const Person={
+//     pName :"Raman",
+//     age:45,
+//     city:"Newyork",
+// }
+// console.log(Person.city = "United states");
+// console.log(Person.city);
+// console.log(Person);
+
+
+//Cosntructor 
+
+
+
+
+function Student(name,age){
+    this.name = name;
+    this.age = age;
+
 }
-console.log(Person.city = "United states");
-console.log(Person.city);
-console.log(Person);
+let Student1 = new Student("Abhay",21);
+console.log(Student1)
