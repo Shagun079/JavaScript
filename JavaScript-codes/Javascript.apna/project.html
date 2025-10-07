@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Records Management</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-around;
+            background-color: #0056b3;
+            padding: 10px;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 5px 10px;
+        }
+
+        nav a:hover {
+            background-color: #00408a;
+            border-radius: 5px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-container {
+            margin-bottom: 20px;
+        }
+
+        .form-container input,
+        .form-container select {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-container button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+
+        .form-container button:hover {
+            background-color: #0056b3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th,
+        table td {
+            padding: 10px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #007BFF;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>IIMT Life Line Records Management System</h1>
+    </header>
+    <nav>
+        <a href="#" onclick="showSection('dashboard')">Dashboard</a>
+        <a href="#" onclick="showSection('add-record')">Add Record</a>
+        <a href="#" onclick="showSection('records')">View Records</a>
+    </nav>
+    <div class="container">
+        <!-- Dashboard Section -->
+        <div id="dashboard" class="form-container" style="display: none;">
+            <h2>Dashboard</h2>
+            <div id="dashboardContent">
+                <p><strong>Total Patients:</strong> <span id="totalPatients">0</span></p>
+                <p><strong>Male Patients:</strong> <span id="malePatients">0</span></p>
+                <p><strong>Female Patients:</strong> <span id="femalePatients">0</span></p>
+                <p><strong>Other Gender Patients:</strong> <span id="otherPatients">0</span></p>
+            </div>
+        </div>
+
+        <!-- Add Record Section -->
+        <div id="add-record" class="form-container" style="display: none;">
+            <h2>Add Patient Record</h2>
+            <form id="recordForm">
+                <input type="text" id="patientName" placeholder="Patient Name" required>
+                <input type="number" id="patientAge" placeholder="Patient Age" required>
+                <select id="patientGender" required>
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="text" id="diagnosis" placeholder="Diagnosis" required>
+                <button type="button" onclick="addRecord()">Add Record</button>
+            </form>
+        </div>
+
+        <!-- Records Section -->
+        <div id="records" style="display: none;">
+            <h2>Patient Records</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Age</th>
+                        <th>Gender</th>
+                        <th>Diagnosis</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="recordsTable">
+                    <!-- Records will appear here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        let records = JSON.parse(localStorage.getItem('patientRecords')) || []; // Load from local storage
+
+        function addRecord() {
+            const name = document.getElementById('patientName').value;
+            const age = document.getElementById('patientAge').value;
+            const gender = document.getElementById('patientGender').value;
+            const diagnosis = document.getElementById('diagnosis').value;
+
+            if (name && age && gender && diagnosis) {
+                const record = { name, age, gender, diagnosis };
+                records.push(record);
+
+                // Save to local storage
+                localStorage.setItem('patientRecords', JSON.stringify(records));
+
+                updateTable();
+                updateDashboard();
+                document.getElementById('recordForm').reset();
+                alert('Record added successfully!');
+            } else {
+                alert('Please fill out all fields.');
+            }
+        }
+
+        function deleteRecord(index) {
+            // Remove the record from the array
+            records.splice(index, 1);
+
+            // Update local storage
+            localStorage.setItem('patientRecords', JSON.stringify(records));
+
+            // Update the table and dashboard
+            updateTable();
+            updateDashboard();
+        }
+
+        function updateTable() {
+            const tableBody = document.getElementById('recordsTable');
+            tableBody.innerHTML = '';
+            records.forEach((record, index) => {
+                const row = `<tr>
+                    <td>${record.name}</td>
+                    <td>${record.age}</td>
+                    <td>${record.gender}</td>
+                    <td>${record.diagnosis}</td>
+                    <td>
+                        <button onclick="deleteRecord(${index})" style="background-color: red; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">Delete</button>
+                    </td>
+                </tr>`;
+                tableBody.innerHTML += row;
+            });
+        }
+
+        function updateDashboard() {
+            // Calculate summary data
+            const totalPatients = records.length;
+            const malePatients = records.filter(record => record.gender === "Male").length;
+            const femalePatients = records.filter(record => record.gender === "Female").length;
+            const otherPatients = records.filter(record => record.gender === "Other").length;
+
+            // Update Dashboard Content
+            document.getElementById('totalPatients').innerText = totalPatients;
+            document.getElementById('malePatients').innerText = malePatients;
+            document.getElementById('femalePatients').innerText = femalePatients;
+            document.getElementById('otherPatients').innerText = otherPatients;
+        }
+
+        function showSection(sectionId) {
+            // Hide all sections
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('add-record').style.display = 'none';
+            document.getElementById('records').style.display = 'none';
+
+            // Show the selected section
+            document.getElementById(sectionId).style.display = 'block';
+
+            // Update dashboard data if it's being shown
+            if (sectionId === 'dashboard') {
+                updateDashboard();
+            }
+        }
+
+        // Initialize the page with the Dashboard visible
+        window.onload = function () {
+            showSection('dashboard');
+            updateDashboard();
+            updateTable();
+        };
+    </script>
+</body>
+</html>
+
